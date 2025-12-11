@@ -6,7 +6,7 @@ void main(){
     MaterialApp(
       home: Home(),
       debugShowCheckedModeBanner: false,
-      title: "The Game Awards"
+      title: "The Game Awards",
     )
   );
 }

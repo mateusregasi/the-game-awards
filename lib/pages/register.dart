@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:thegameawards/pages/moderator.dart';
-import 'package:thegameawards/view/interface.dart';
-import 'register.dart';
-import 'user.dart';
+import '../utils/conf.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class Register extends StatefulWidget {
+  const Register({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Register> createState() => _RegisterState();
 }
 
-class _HomeState extends State<Home> {
-  GlobalKey _forms = GlobalKey();
-
+class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
-    return Interface(
+    return Scaffold(
+      appBar: AppBar(
+        title: Title(
+          color: Colors.white, 
+          child: Text("The Game Awards"),
+        ),
+        titleTextStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 30
+        ),
+        backgroundColor: Conf.primaryColor,
+        foregroundColor: Colors.white, 
+      ),
       body: Container(
         padding: EdgeInsets.all(30),
         child: Column(
@@ -30,9 +37,9 @@ class _HomeState extends State<Home> {
                       padding: EdgeInsets.fromLTRB(
                         0, 0, 0, 30
                       ),
-                      child:   TextFormField(
+                      child: TextFormField(
                         decoration: InputDecoration(
-                          label: Text("Login"),
+                          label: Text("Username"),
                           border: OutlineInputBorder()
                         ),
                         validator: (value){
@@ -44,7 +51,21 @@ class _HomeState extends State<Home> {
                       padding: EdgeInsets.fromLTRB(
                         0, 0, 0, 30
                       ),
-                      child:   TextFormField(
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          label: Text("Email"),
+                          border: OutlineInputBorder()
+                        ),
+                        validator: (value){
+                          return value;
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(
+                        0, 0, 0, 30
+                      ),
+                      child: TextFormField(
                         decoration: InputDecoration(
                           label: Text("Senha"),
                           border: OutlineInputBorder()
@@ -54,8 +75,18 @@ class _HomeState extends State<Home> {
                         },
                       ),
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: false, 
+                          onChanged: (value) => "",
+                        ),
+                        Text("Administrador")  
+                      ],
+                    )
                 ],
-              )
+              ),
             ),
 
             Column(
@@ -65,20 +96,14 @@ class _HomeState extends State<Home> {
                     0, 30, 0, 30
                   ),
                   child: ElevatedButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Moderator())
-                    ), 
-                    child: Text("Login")
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Cadastrar")
                   ),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => Register())
-                  ),
+                  onPressed: () => Navigator.pop(context),
                   child: Text(
-                    "Não possui conta?\nCadastre-se!",
+                    "Já possui conta?\nFaça login!",
                     style: TextStyle(
                       decoration: TextDecoration.underline
                     ),
@@ -90,7 +115,6 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
-      title: "The Game Awards",
     );
   }
 }

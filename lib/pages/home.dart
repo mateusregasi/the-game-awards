@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:thegameawards/controller/login_controler.dart';
 import 'package:thegameawards/pages/moderator.dart';
 import 'package:thegameawards/view/interface.dart';
 import 'register.dart';
-import 'user.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,7 +13,26 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  GlobalKey _forms = GlobalKey();
+  GlobalKey<FormState> _forms = GlobalKey<FormState>();
+  LoginController loginController = LoginController();
+  String _login = "";
+  String _password = "";
+   
+
+  login() async{
+    final form = _forms.currentState;
+    if(form!.validate())
+      form.save();
+    if(await loginController.verifyUser(_login, _password)){
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Moderator())
+      );
+    } else{
+      // Resposta
+    }
+    print("verificar");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +44,7 @@ class _HomeState extends State<Home> {
           children: [
             // Imagem
             Form(
+              key: _forms,
               child: Column(
                 children: [
                     Container(
@@ -33,11 +54,9 @@ class _HomeState extends State<Home> {
                       child:   TextFormField(
                         decoration: InputDecoration(
                           label: Text("Login"),
-                          border: OutlineInputBorder()
+                          border: OutlineInputBorder(),
                         ),
-                        validator: (value){
-                          return value;
-                        },
+                        onSaved: (newValue) => _login = newValue!,
                       ),
                     ),
                     Container(
@@ -49,9 +68,7 @@ class _HomeState extends State<Home> {
                           label: Text("Senha"),
                           border: OutlineInputBorder()
                         ),
-                        validator: (value){
-                          return value;
-                        },
+                        onSaved: (newValue) => _password = newValue!,
                       ),
                     ),
                 ],
@@ -65,10 +82,7 @@ class _HomeState extends State<Home> {
                     0, 30, 0, 30
                   ),
                   child: ElevatedButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Moderator())
-                    ), 
+                    onPressed: login, 
                     child: Text("Login")
                   ),
                 ),

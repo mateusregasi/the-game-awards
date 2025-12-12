@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'categories.dart';
 import "../view/interface.dart";
-import '../utils/conf.dart';
 
 class User extends StatefulWidget {
   const User({super.key});
@@ -15,7 +14,7 @@ class _UserState extends State<User> {
   Widget build(BuildContext context) {
     return Interface(
       body: Center(
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.of(context).size.height * 0.8,
           child: Categories(),
         ),

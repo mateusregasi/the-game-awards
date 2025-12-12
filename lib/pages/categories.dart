@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thegameawards/pages/games.dart';
-import '../utils/conf.dart';
 
 class Categories extends StatefulWidget {
   const Categories({super.key});

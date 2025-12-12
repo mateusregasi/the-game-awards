@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:thegameawards/controller/login_controler.dart';
 import 'categories.dart';
-import "../view/interface.dart";
 
 class User extends StatefulWidget {
   const User({super.key});
@@ -12,14 +12,29 @@ class User extends StatefulWidget {
 class _UserState extends State<User> {
   @override
   Widget build(BuildContext context) {
-    return Interface(
-      body: Center(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.8,
-          child: Categories(),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Categorias"),
+        actions: [
+          TextButton(
+            onPressed: (){
+              LoginController.logout();
+              Navigator.pop(context);
+            }, 
+            child: Text("Logout")
+          )
+        ]
       ),
-      title: "Categorias",
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF1E1E1E), Colors.black],
+          ),
+        ),
+        child: Categories(),
+      ),
     );
   }
 }

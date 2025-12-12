@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:thegameawards/controller/login_controler.dart';
 import 'package:thegameawards/pages/categoriemoderator.dart';
 import 'package:thegameawards/pages/categories.dart';
 import 'package:thegameawards/pages/gamesmoderator.dart';
-import 'package:thegameawards/utils/conf.dart';
+// import 'package:thegameawards/utils/conf.dart'; // Não precisa mais
 
 class InterfaceModerator extends StatefulWidget {
-  String title;
-  InterfaceModerator({super.key, required this.title});
+  final String title;
+  const InterfaceModerator({super.key, required this.title});
 
   @override
   State<InterfaceModerator> createState() => _InterfaceModeratorState();
@@ -14,57 +15,79 @@ class InterfaceModerator extends StatefulWidget {
 
 class _InterfaceModeratorState extends State<InterfaceModerator> {
   int _page = 0;
-  List<Widget> _pages = [
-    Categories(),
-    GamesModerator(),
-    CategorieModerator(),
+  
+  
+  final List<Widget> _pages = [
+    Categories(),       
+    GamesModerator(),   
+    CategorieModerator(), 
   ];
 
   @override
   Widget build(BuildContext context) {
-    print(widget.title);
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Title(
-            color: Colors.white, 
-            child: Text(widget.title),
-          ),
-        ),
-        titleTextStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 30,
-        ),
-        backgroundColor: Conf.primaryColor,
-        foregroundColor: Colors.white, 
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.how_to_vote_outlined),
-            label: "Votação",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.gamepad),
-            label: "Jogos",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category),
-            label: "Categorias",
-          ),
+        title: Text(widget.title),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        actions: [
+          TextButton(
+            onPressed: (){
+              LoginController.logout();
+              Navigator.pop(context);
+            }, 
+            child: Text("Logout")
+          )
         ],
-        currentIndex: _page,
-        onTap: (value){
-          setState(() {
-            _page = value;
-          });
-        },
       ),
+     
       body: Container(
-        padding: EdgeInsets.all(30),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF1E1E1E), Colors.black],
+          ),
+        ),
         child: _pages[_page],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      
+    
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.white10, width: 1))
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.black, 
+          selectedItemColor: Colors.amber[800], 
+          unselectedItemColor: Colors.grey[600], 
+          currentIndex: _page,
+          showUnselectedLabels: true,
+          type: BottomNavigationBarType.fixed, 
+          onTap: (value) {
+            setState(() {
+              _page = value;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.how_to_vote_outlined),
+              activeIcon: Icon(Icons.how_to_vote),
+              label: "Votação",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.gamepad_outlined),
+              activeIcon: Icon(Icons.gamepad),
+              label: "Gerenciar Jogos",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.category_outlined),
+              activeIcon: Icon(Icons.category),
+              label: "Gerenciar Cat.",
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

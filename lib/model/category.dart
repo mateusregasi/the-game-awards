@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:thegameawards/utils/database.dart';
+
 class Category {
 
   final int? id;
@@ -39,4 +41,23 @@ class Category {
   String toJson() => jsonEncode(toMap());
 
   factory Category.fromJson(String source) => Category.fromMap(jsonDecode(source) as Map<String, dynamic>);
+
+  Future<int> save(DatabaseHelper con) async {
+    var db = await con.db;
+    int res = await db.insert('category', toMap());
+    return res;
+  }
+  
+  Future<int> delete(DatabaseHelper con) async {
+    var db = await con.db;
+    int res = await db.delete("category", where: "id = ?", whereArgs: [id]);
+    return res;
+  }
+
+  static Future<List<Category>> getAll(DatabaseHelper con) async {
+    var db = await con.db;
+    var res = await db.query("category");
+    List<Category> list = res.isNotEmpty ? res.map((c) => Category.fromMap(c)).toList() : [];
+    return list;
+  }
 }

@@ -1,3 +1,7 @@
+// ARQUIVO DESATIVADO - SUBSTITUÍDO PELO TEMA GLOBAL
+// MANTIDO APENAS PARA REFERÊNCIA HISTÓRICA
+
+/*
 import 'package:flutter/material.dart';
 import "../utils/conf.dart";
 
@@ -38,3 +42,4 @@ class _InterfaceState extends State<Interface> {
     );
   }
 }
+*/

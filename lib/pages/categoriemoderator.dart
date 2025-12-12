@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:thegameawards/controller/category_controller.dart';
+import 'package:thegameawards/model/category.dart';
 
 class CategorieModerator extends StatefulWidget {
   const CategorieModerator({super.key});
@@ -8,6 +10,8 @@ class CategorieModerator extends StatefulWidget {
 }
 
 class _CategorieModeratorState extends State<CategorieModerator> {
+  CategoryController _categoryController = CategoryController();
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -24,34 +28,44 @@ class _CategorieModeratorState extends State<CategorieModerator> {
             padding: EdgeInsetsGeometry.all(30) 
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: 30,
-              itemBuilder: (context, index) => GestureDetector(
-                child: Card(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Nome"),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => "", 
-                              icon: Icon(Icons.edit)
-                            ),
-                            IconButton(
-                              onPressed: () => "", 
-                              icon: Icon(Icons.delete)
-                            ),
-                          ],
-                        )
-                      ],
+            child: FutureBuilder(
+              future: _categoryController.getCategories(), 
+              builder: (context, snapshot){
+                if(snapshot.hasData){
+                  List<Category> categories = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) => GestureDetector(
+                      child: Card(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(categories[index].title),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: () => "", 
+                                    icon: Icon(Icons.edit)
+                                  ),
+                                  IconButton(
+                                    onPressed: () => "", 
+                                    icon: Icon(Icons.delete)
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ) 
+                      ),
+                      onTap: () => "",
                     ),
-                  ) 
-                ),
-                onTap: () => "",
-              ),
+                  );
+                } else{
+                  return CircularProgressIndicator();
+                }
+              } 
             )
           )
         ],

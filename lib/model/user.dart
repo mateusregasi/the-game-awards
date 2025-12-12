@@ -56,10 +56,10 @@ class User {
     return res;
   }
 
-  static Future<User> getUserByLogin(DatabaseHelper con, String login, String password) async {
+  static Future<User> getUserByLogin(DatabaseHelper con, String name, String password) async {
     var db = await con.db;
     String sql = """
-      SELECT * FROM user WHERE email = '$login' AND password = '$password' 
+      SELECT * FROM user WHERE name = '$name' AND password = '$password' 
     """;
    
     var res = await db.rawQuery(sql);
@@ -76,5 +76,14 @@ class User {
     var res = await db.query("user");
     List<User> list = res.isNotEmpty ? res.map((c) => User.fromMap(c)).toList() : [];
     return list;
+  }
+
+  static Future<User> getUserById(DatabaseHelper con, int id) async {
+    var db = await con.db;
+    var res = await db.query("user", where: "id = $id");
+    if (res.length > 0) {
+      return User.fromMap(res.first);
+    }
+    return User(id: -1, name: "", password: "", email: "", role: 0);
   }
 }

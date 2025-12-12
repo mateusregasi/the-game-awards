@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:thegameawards/controller/game_controller.dart';
+import 'package:thegameawards/model/game.dart';
 
 class GamesModerator extends StatefulWidget {
   const GamesModerator({super.key});
@@ -8,6 +10,8 @@ class GamesModerator extends StatefulWidget {
 }
 
 class _GamesModeratorState extends State<GamesModerator> {
+  GameController _gameController = GameController();
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -24,34 +28,44 @@ class _GamesModeratorState extends State<GamesModerator> {
             padding: EdgeInsetsGeometry.all(30) 
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: 30,
-              itemBuilder: (context, index) => GestureDetector(
-                child: Card(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Nome"),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => "", 
-                              icon: Icon(Icons.edit)
-                            ),
-                            IconButton(
-                              onPressed: () => "", 
-                              icon: Icon(Icons.delete)
-                            ),
-                          ],
-                        )
-                      ],
+            child: FutureBuilder(
+              future: _gameController.getAllGames(), 
+              builder: (context, snapshot){
+                if(snapshot.hasData){
+                  List<Game> games = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: games.length,
+                    itemBuilder: (context, index) => GestureDetector(
+                      child: Card(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(games[index].name),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: () => "", 
+                                    icon: Icon(Icons.edit)
+                                  ),
+                                  IconButton(
+                                    onPressed: () => "", 
+                                    icon: Icon(Icons.delete)
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ) 
+                      ),
+                      onTap: () => "",
                     ),
-                  ) 
-                ),
-                onTap: () => "",
-              ),
+                  );
+                } else{
+                  return CircularProgressIndicator();
+                }
+              }
             )
           )
         ],

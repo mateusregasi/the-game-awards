@@ -5,16 +5,15 @@ class RegisterController {
   DatabaseHelper con = DatabaseHelper();
   User? user;
 
-  bool register(String name, String email, String password, int role){
-    user = User.fromMap({
-      "name": name,
-      "password": password,
-      "email": email,
-      "role": role,
-    });
+  Future<bool> register(String name, String email, String password, int role) async {
+    user = User(
+      name: name,
+      password: password,
+      email: email,
+      role: role,
+    );
+    int result = await user!.save(con);
 
-    user!.save(con);
-    return true;
+    return result > 0;
   }
-
 }

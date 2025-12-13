@@ -17,156 +17,249 @@ class DatabaseHelper {
   }
 
   Future<Database> initDb() async {
+    // Inicializa o FFI para suportar Linux/Windows/Mac (ambiente de desenvolvimento)
     sqfliteFfiInit();
-
     var databaseFactory = databaseFactoryFfi;
-    io.Directory appDocumentsDir = await getApplicationDocumentsDirectory();
 
-    final path = p.join(appDocumentsDir.path, "data.db");
+    io.Directory appDocumentsDir = await getApplicationDocumentsDirectory();
+    // NOME ALTERADO PARA FORÇAR NOVA CRIAÇÃO COM DADOS COMPLETOS
+    final path = p.join(appDocumentsDir.path, "tga_2025_final.db"); 
 
     Database db = await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: 1,
         onCreate: (db, version) async {
+      
+          
+          await db.execute("""
+            CREATE TABLE user(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name VARCHAR NOT NULL,
+              email VARCHAR NOT NULL,
+              password VARCHAR NOT NULL,
+              role INTEGER NOT NULL
+            );
+          """);
 
-          String sql = """
+          await db.execute("""
+            CREATE TABLE genre(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name VARCHAR NOT NULL
+            );
+          """);
+
+          await db.execute("""
+            CREATE TABLE game(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL,
+              name VARCHAR NOT NULL UNIQUE,
+              description TEXT NOT NULL,
+              release_date VARCHAR NOT NULL,
+              FOREIGN KEY(user_id) REFERENCES user(id)
+            );
+          """);
+
+          await db.execute("""
+            CREATE TABLE category(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL,
+              title VARCHAR NOT NULL,
+              description TEXT,  
+              date VARCHAR NOT NULL,
+              FOREIGN KEY(user_id) REFERENCES user(id)
+            );
+          """);
+
+          await db.execute("""
+            CREATE TABLE category_game(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              category_id INTEGER NOT NULL,
+              game_id INTEGER NOT NULL,
+              FOREIGN KEY(category_id) REFERENCES category(id),
+              FOREIGN KEY(game_id) REFERENCES game(id)
+            );
+          """);
+
+          await db.execute("""
+            CREATE TABLE user_vote(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL,
+              category_id INTEGER NOT NULL,
+              vote_game_id INTEGER NOT NULL,    
+              FOREIGN KEY(user_id) REFERENCES user(id),
+              FOREIGN KEY(category_id) REFERENCES category(id),
+              FOREIGN KEY(vote_game_id) REFERENCES game(id)
+            );
+          """);
+
+       
+
+  
+          await db.rawInsert("INSERT INTO user(name, email, password, role) VALUES('admin', 'admin@tga.com', 'admin', 1)"); 
+          await db.rawInsert("INSERT INTO user(name, email, password, role) VALUES('user', 'user@tga.com', '123', 0)");
+
+        
+          Map<String, List<String>> categoriesData = {
+            'Jogo do ano': [
+              'Clair Obscur: Expedition 33', 'Death Stranding 2: On the beach', 'Donkey Kong Bananza',
+              'Hades 2', 'Hollow Knight: Silksong', 'Kingdom Come: Deliverance 2'
+            ],
+            'Melhor direção': [
+              'Clair Obscur: Expedition 33', 'Death Stranding 2: On the beach', 'Ghost of Yotei',
+              'Hades 2', 'Split Fiction'
+            ],
+            'Melhor time de esports': [
+              'Gen.G - League of legends', 'NRG - Valorant', 'Team Falcons - Dota 2',
+              'Team Liquid PH - Mobile Legends: Bang bang', 'Team Vitality - Counter Strike 2'
+            ],
+            'Melhor atleta de esports': [
+              'Brawk', 'Chovy', 'Forsaken', 'Kakeru', 'Menard', 'Zywoo'
+            ],
+            'Melhor jogo de esports': [
+              'Counter Strike 2', 'Dota 2', 'League of legends', 'Mobile legends: Bang bang', 'Valorant'
+            ],
+            'Melhor jogo de esporte/corrida': [
+              'FC 26', 'F1 25', 'Mario Kart World', 'Rematch', 'Sonic Racing: CrossWorlds'
+            ],
+            'Melhor jogo de simulação/estratégia': [
+              'The Alters', 'Final Fantasy Tactics - The Ivalice chronicles', 'Jurassic World Evolution 3',
+              'Civilization 7', 'Tempest rising', 'Two point museum'
+            ],
+            'Melhor jogo para a família': [
+              'Donkey Kong Bananza', 'Lego Party!', 'Lego Voyagers', 'Mario Kart World',
+              'Sonic Racing: CrossWorlds', 'Split Fiction'
+            ],
+            'Inovação em acessibilidade': [
+              "Assassin's Creed Shadows", 'Atomfall', 'Doom: The dark ages', 'FC 26', 'South of midnight'
+            ],
+            'Melhor jogo de ação': [
+              'Battlefield 6', 'Doom: The dark ages', 'Hades 2', 'Ninja Gaiden 4', 'Shinobi: Art of vengeance'
+            ],
+            'Melhor jogo de luta': [
+              '2XKO', 'Capcom Fighting Collection 2', 'Fatal Fury: City of the wolves',
+              'Mortal Kombat: Legacy kollection', 'Virtua Fighter 5 R.E.V.O. World Stage'
+            ],
+            'Melhor jogo de RPG': [
+              'Avowed', 'Clair Obscur: Expedition 33', 'Kingdom Come: Deliverance 2',
+              'Monster Hunter Wilds', 'The Outer Worlds 2'
+            ],
+            'Melhor jogo de ação/aventura': [
+              'Death Stranding 2: On the beach', 'Ghost of Yotei', 'Hollow Knight: Silksong',
+              'Indiana Jones and the great circle', 'Split Fiction'
+            ],
+            'Jogo mais aguardado': [
+              '007: First light', 'Grand theft auto 6', "Marvel's Wolverine",
+              'Resident Evil: Requiem', 'The Witcher 4'
+            ],
+            'Criador de conteúdo do ano': [
+              'Caedrel', 'Kai Cenat', 'Moistcr1tikal', 'Sakura Miko', 'The Burnt Peanut'
+            ],
+            'Melhor jogo de VR/AR': [
+              'Alien: Rogue Incursion', 'Arken Age', 'Ghost town', "Marvel's Deadpool VR", 'The midnight walk'
+            ],
+            'Melhor jogo de estreia independente': [
+              'Blue Prince', 'Clair Obscur: Expedition 33', 'Despelote', 'Dispatch', 'Megabonk'
+            ],
+            'Melhor jogo independente': [
+              'Absolum', 'Ball x Pit', 'Blue Prince', 'Clair Obscur: Expedition 33',
+              'Hades 2', 'Hollow Knight: Silksong'
+            ],
+            'Melhor multiplayer': [
+              'Arc Raiders', 'Battlefield 6', 'Elden Ring: Nightreign', 'Peak', 'Split Fiction'
+            ],
+            'Games for impact': [
+              'Consume me', 'Despelote', 'Lost records: Bloom & rage', 'South of midnight', 'Wanderstop'
+            ],
+            'Melhor apoio à comunidade': [
+              "Baldur's Gate 3", 'Final Fantasy 14', 'Fortnite', 'Helldivers 2', "No man's sky"
+            ],
+            'Melhor narrativa': [
+              'Clair Obscur: Expedition 33', 'Death Stranding 2: On the beach', 'Ghost of Yotei',
+              'Kingdom Come: Deliverance 2', 'Silent Hill f'
+            ],
+            'Melhor adaptação': [
+              'Um filme Minecraft', 'Devil May Cry', 'Splinter Cell: Deathwatch', 'The last of us', 'Untill Dawn'
+            ],
+            'Melhor direção de som': [
+              'Battlefield 6', 'Clair Obscur: Expedition 33', 'Death Stranding 2: On the beach',
+              'Ghost of Yotei', 'Silent Hill f'
+            ],
+            'Melhor trilha e música': [
+              "Christopher Larkin - Hollow Knight: Silksong",
+              "Darren Korb - Hades 2",
+              "Lorien Testard - Clair Obscur: Expedition 33",
+              "Toma Otowa - Ghost of Yotei",
+              "Woodkid & Ludvig Forssell - Death Stranding 2: On the beach"
+            ],
+            'Melhor direção de arte': [
+              'Clair Obscur: Expedition 33', 'Death Stranding 2: On the beach', 'Ghost of Yotei',
+              'Hades 2', 'Hollow Knight: Silksong'
+            ],
+            'Melhor jogo para dispositivos móveis': [
+              'Destiny rising', 'Persona 5: The Phantom X', 'Sonic Rumble',
+              'Umamusume: Pretty derby', 'Wuthering waves'
+            ],
+            'Melhor jogo em atualização': [
+              'Final Fantasy 14', 'Fortnite', 'Helldivers 2', 'Marvel Rivals', "No man's sky"
+            ],
+            'Melhor atuação': [
+              "Ben Starr - Clair Obscur: Expedition 33",
+              "Charlie Cox - Clair Obscur: Expedition 33",
+              "Erika Ishii - Ghost of Yotei",
+              "Jennifer English - Clair Obscur: Expedition 33",
+              "Konatsu Kato - Silent Hill f",
+              "Troy Baker - Indiana Jones and the great circle"
+            ]
+          };
+
+       
+          Map<String, int> gameIdCache = {};
+
+          for (var entry in categoriesData.entries) {
+            String catTitle = entry.key;
+            List<String> nominees = entry.value;
+
+            int catId = await db.rawInsert(
+              "INSERT INTO category(title, description, date, user_id) VALUES(?, ?, '2025', 1)",
+              [catTitle, "Votação oficial TGA 2025"]
+            );
+
+            for (String nomineeName in nominees) {
+              int gameId;
               
-              CREATE TABLE user(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name VARCHAR NOT NULL,
-                email VARCHAR NOT NULL,
-                password VARCHAR NOT NULL,
-                role INTEGER NOT NULL
+              
+              String cleanName = nomineeName.replaceAll(RegExp(r"^'|'$"), "");
+
+              if (gameIdCache.containsKey(cleanName)) {
+            
+                gameId = gameIdCache[cleanName]!;
+              } else {
+                
+                var res = await db.rawQuery("SELECT id FROM game WHERE name = ?", [cleanName]);
+                if (res.isNotEmpty) {
+                  gameId = res.first['id'] as int;
+                } else {
+                  
+                  gameId = await db.rawInsert(
+                    "INSERT INTO game(user_id, name, description, release_date) VALUES(1, ?, 'Nomeado TGA 2025', '2025')",
+                    [cleanName]
+                  );
+                }
+                gameIdCache[cleanName] = gameId;
+              }
+
+            
+              await db.rawInsert(
+                "INSERT INTO category_game(category_id, game_id) VALUES(?, ?)",
+                [catId, gameId]
               );
-
-              CREATE TABLE genre(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name VARCHAR NOT NULL
-              );
-
-              CREATE TABLE game(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                name VARCHAR NOT NULL UNIQUE,
-                description TEXT NOT NULL,
-                release_date VARCHAR NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES user(id)
-              );
-
-              CREATE TABLE game_genre(
-                game_id INTEGER NOT NULL,
-                genre_id INTEGER NOT NULL,
-                FOREIGN KEY(game_id) REFERENCES game(id),
-                FOREIGN KEY(genre_id) REFERENCES genre(id)
-              );
-
-              CREATE TABLE category(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                title VARCHAR NOT NULL,
-                description TEXT,  
-                date VARCHAR NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES user(id)
-              );
-
-              CREATE TABLE category_game(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                category_id INTEGER NOT NULL,
-                game_id INTEGER NOT NULL,
-                FOREIGN KEY(category_id) REFERENCES category(id),
-                FOREIGN KEY(game_id) REFERENCES game(id)
-              );
-
-              CREATE TABLE user_vote(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                category_id INTEGER NOT NULL,
-                vote_game_id INTEGER NOT NULL,    
-                FOREIGN KEY(user_id) REFERENCES user(id),
-                FOREIGN KEY(category_id) REFERENCES category(id),
-                FOREIGN KEY(vote_game_id) REFERENCES category_game(game_id)
-              );
-
-              INSERT INTO user(name, email, password, role) VALUES('Teste 1', 'teste1@teste', '123456', 0);
-              INSERT INTO user(name, email, password, role) VALUES('Teste 2', 'teste2@teste', '123456', 0);
-              INSERT INTO user(name, email, password, role) VALUES('Teste 3', 'teste3@teste', '123456', 0);
-              INSERT INTO user(name, email, password, role) VALUES('Teste 4', 'teste4@teste', '123456', 1);
-              INSERT INTO user(name, email, password, role) VALUES('Teste 5', 'teste5@teste', '123456', 1);
-              INSERT INTO user(name, email, password, role) VALUES('usuario', 'email', 'senha', 1);
-              INSERT INTO user(name, email, password, role) VALUES('usuario2', 'email', 'senha', 0);
-
-              INSERT INTO genre(name) VALUES('Aventura');
-              INSERT INTO genre(name) VALUES('Ação');
-              INSERT INTO genre(name) VALUES('RPG');
-              INSERT INTO genre(name) VALUES('Indie');
-              INSERT INTO genre(name) VALUES('Plataforma');
-              INSERT INTO genre(name) VALUES('Metroidvania');
-              INSERT INTO genre(name) VALUES('Rogue Lite');
-              INSERT INTO genre(name) VALUES('Survival Horror');
-              INSERT INTO genre(name) VALUES('Mundo Aberto');
-
-
-              INSERT INTO game(user_id, name, description, release_date) VALUES(1,'Clair Obscur: Expedition 33', 'Once a year, the Paintress wakes and paints upon her monolith. Paints her cursed number. And everyone past that age turns to smoke and fades away. Year by year, that number ticks down and more of us are erased. Tomorrow she’ll wake and paint “33.” And tomorrow we depart on our final mission - Destroy the Paintress, so she can never paint death again. We are Expedition 33.
-              Clair Obscur: Expedition 33 is a ground-breaking turn-based RPG with unique real-time mechanics, making battles more immersive and addictive than ever. Explore a fantasy world inspired by Belle Époque France in which you battle devastating enemies.', '2025-04-24');
-
-              INSERT INTO game(user_id, name, description, release_date) VALUES(1, 'Hades 2', 'The first-ever sequel from Supergiant Games builds on the best aspects of the original god-like rogue-like dungeon crawler in an all-new, action-packed, endlessly replayable experience rooted in the Underworld of Greek myth and its deep connections to the dawn of witchcraft.', '2025-09-25');
-
-              INSERT INTO game(user_id, name, description, release_date) VALUES(2, 'Hollow Knight: Silksong', 'As the lethal hunter Hornet, adventure through a kingdom ruled by silk and song! Captured and taken to this unfamiliar world, prepare to battle mighty foes and solve ancient mysteries as you ascend on a deadly pilgrimage to the kingdom’s peak.
-              Hollow Knight: Silksong is the epic sequel to Hollow Knight, the award winning action-adventure. Journey to all-new lands, discover new powers, battle vast hordes of bugs and beasts and uncover secrets tied to your nature and your past. ', '2025-09-04');
-
-              INSERT INTO game(user_id, name, description, release_date) VALUES(3, 'Death Stranding 2: On the Beach', 'Com companheiros ao seu lado, Sam inicia uma nova jornada para salvar a humanidade da extinção.
-              Junte-se a eles na travessia desse mundo problemático repleto de inimigos sobrenaturais, obstáculos e uma questão inquietante: deveríamos ter nos conectado?
-              Hideo Kojima, o lendário designer de jogos, muda o mundo mais uma vez.', '2025-06-26');
-
-              INSERT INTO game(user_id, name, description, release_date) VALUES(3, 'Donkey Kong Bananza', 'Donkey Kong Bananza é um jogo eletrônico de plataforma desenvolvido e publicado pela Nintendo para o Nintendo Switch 2. O jogador controla o gorila Donkey Kong, que se aventura no subsolo com a jovem Pauline para recuperar artefatos conhecido como Cristais de Banândio de um grupo de macacos vilões.', '2025-07-17');
-
-              INSERT INTO game(user_id, name, description, release_date) VALUES(3, 'Kingdom Come: Deliverance II', 'Kingdom Come: Deliverance II é um RPG de ação desenvolvido pela Warhorse Studios e publicado pela Deep Silver. Sequência de Kingdom Come: Deliverance, o jogo foi lançado para PlayStation 5, Windows e Xbox Series X/S no dia 4 de fevereiro de 2025', '2025-02-04');
-
-              INSERT INTO game_genre(game_id, genre_id) VALUES(1, 3);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(2, 2);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(2, 3);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(2, 4);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(3, 2);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(3, 3);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(3, 4);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(4, 2);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(5, 1);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(5, 2);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(6, 3);
-              INSERT INTO game_genre(game_id, genre_id) VALUES(6, 9);
-
-              INSERT INTO category(title, description, date, user_id) VALUES('Game of the Year','Recognizing a game that delivers the absolute best experience across all creative and technical fields.', '2025-12-11', 0);
-              INSERT INTO category(title, description, date, user_id) VALUES('Best Narrative','For outstanding storytelling and narrative development in a game.', '2025-12-11', 0);
-              INSERT INTO category(title, description, date, user_id) VALUES('Best RPG','For the best game designed with rich player character customization and progression, including massively multiplayer experiences.', '2025-12-11', 0);
-              INSERT INTO category(title, description, date, user_id) VALUES('Best Family','For the best game appropriate for family play, irrespective of genre or platform.', '2025-12-11', 0);
-              INSERT INTO category(title, description, date, user_id) VALUES('Best Independent Game','For outstanding creative and technical achievement in a game made outside the traditional publisher system.', '2025-12-11', 1);
-              INSERT INTO category(title, description, date, user_id) VALUES('Best Fighting','For the best game designed primarily around head-to-head combat.', '2025-12-11', 1);
-
-              INSERT INTO category_game(category_id, game_id) VALUES(1, 1);
-              INSERT INTO category_game(category_id, game_id) VALUES(1, 2);
-              INSERT INTO category_game(category_id, game_id) VALUES(1, 3);
-              INSERT INTO category_game(category_id, game_id) VALUES(1, 4);
-              INSERT INTO category_game(category_id, game_id) VALUES(1, 5);
-              INSERT INTO category_game(category_id, game_id) VALUES(1, 6);
-              INSERT INTO category_game(category_id, game_id) VALUES(2, 1);
-              INSERT INTO category_game(category_id, game_id) VALUES(2, 2);
-
-              INSERT INTO user_vote(user_id, category_id, vote_game_id) VALUES(4, 1, 3);
-              INSERT INTO user_vote(user_id, category_id, vote_game_id) VALUES(4, 2, 1);
-              INSERT INTO user_vote(user_id, category_id, vote_game_id) VALUES(4, 1, 3);
-              INSERT INTO user_vote(user_id, category_id, vote_game_id) VALUES(5, 1, 1);
-              INSERT INTO user_vote(user_id, category_id, vote_game_id) VALUES(5, 2, 2);
-
-              """;
-          await db.execute(sql);
-
+            }
+          }
         }
       )
     );
 
     return db;
   }
-
-
 }

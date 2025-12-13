@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:thegameawards/model/category.dart';
-import 'package:thegameawards/model/category_controller.dart';
-import 'package:thegameawards/model/category_form.dart';
+import 'package:thegameawards/controller/game_controller.dart';
+import 'package:thegameawards/model/game.dart';
+import 'package:thegameawards/pages/game_form.dart'; 
 
-class CategorieModerator extends StatefulWidget {
-  const CategorieModerator({super.key});
+class GamesModerator extends StatefulWidget {
+  const GamesModerator({super.key});
 
   @override
-  State<CategorieModerator> createState() => _CategorieModeratorState();
+  State<GamesModerator> createState() => _GamesModeratorState();
 }
 
-class _CategorieModeratorState extends State<CategorieModerator> {
-  CategoryController _categoryController = CategoryController();
-  late Future<List<Category>> _catFuture;
+class _GamesModeratorState extends State<GamesModerator> {
+  GameController _gameController = GameController();
+  // Variável para forçar recarregamento da lista
+  late Future<List<Game>> _gamesFuture;
 
   @override
   void initState() {
@@ -22,16 +23,16 @@ class _CategorieModeratorState extends State<CategorieModerator> {
 
   void _refreshList() {
     setState(() {
-      _catFuture = _categoryController.getCategories();
+      _gamesFuture = _gameController.getAllGames();
     });
   }
 
-  void _deleteCategory(int id) async {
+  void _deleteGame(int id) async {
     bool confirm = await showDialog(
       context: context, 
       builder: (ctx) => AlertDialog(
-        title: Text("Excluir Categoria?"),
-        content: Text("Isso pode apagar os votos associados."),
+        title: Text("Tem certeza?"),
+        content: Text("Esta ação não pode ser desfeita."),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text("Cancelar")),
           TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text("Excluir", style: TextStyle(color: Colors.red))),
@@ -40,9 +41,18 @@ class _CategorieModeratorState extends State<CategorieModerator> {
     ) ?? false;
 
     if (confirm) {
-      await _categoryController.deleteCategory(id);
+      await _gameController.deleteGame(id);
       _refreshList();
     }
+  }
+
+  void _editGame(Game game) async {
+    // Navega para o form e espera retorno (true se salvou)
+    bool? saved = await Navigator.push(
+      context, 
+      MaterialPageRoute(builder: (context) => GameForm(game: game))
+    );
+    if (saved == true) _refreshList();
   }
 
   @override
@@ -55,43 +65,41 @@ class _CategorieModeratorState extends State<CategorieModerator> {
             width: double.infinity,
             child: ElevatedButton.icon(
               icon: Icon(Icons.add, color: Colors.black),
-              label: Text("NOVA CATEGORIA", style: TextStyle(color: Colors.black)),
+              label: Text("NOVO JOGO", style: TextStyle(color: Colors.black)),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[800]),
               onPressed: () async {
-                bool? saved = await Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryForm()));
+                bool? saved = await Navigator.push(context, MaterialPageRoute(builder: (context) => GameForm()));
                 if (saved == true) _refreshList();
               },
             ),
           ),
         ),
         Expanded(
-          child: FutureBuilder<List<Category>>(
-            future: _catFuture, 
+          child: FutureBuilder<List<Game>>(
+            future: _gamesFuture, 
             builder: (context, snapshot){
               if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-              
-              List<Category> categories = snapshot.data!;
+              if (snapshot.data!.isEmpty) return Center(child: Text("Nenhum jogo cadastrado."));
+
+              List<Game> games = snapshot.data!;
               return ListView.builder(
-                itemCount: categories.length,
+                itemCount: games.length,
                 itemBuilder: (context, index) {
-                  Category cat = categories[index];
+                  Game game = games[index];
                   return Card(
                     margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     child: ListTile(
-                      leading: Icon(Icons.emoji_events, color: Colors.amber),
-                      title: Text(cat.title),
+                      title: Text(game.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(game.description, maxLines: 1, overflow: TextOverflow.ellipsis),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            onPressed: () async {
-                              bool? saved = await Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryForm(category: cat)));
-                              if (saved == true) _refreshList();
-                            }, 
+                            onPressed: () => _editGame(game), 
                             icon: Icon(Icons.edit, color: Colors.blue)
                           ),
                           IconButton(
-                            onPressed: () => _deleteCategory(cat.id!), 
+                            onPressed: () => _deleteGame(game.id!), 
                             icon: Icon(Icons.delete, color: Colors.red)
                           ),
                         ],
@@ -100,7 +108,7 @@ class _CategorieModeratorState extends State<CategorieModerator> {
                   );
                 },
               );
-            } 
+            }
           )
         )
       ],

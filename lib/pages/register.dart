@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thegameawards/controller/register_controller.dart';
-
+import 'package:thegameawards/controller/register_controller.dart'; 
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -10,139 +9,72 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isAdmin = false;
-  String _name = "";
-  String _email = "";
-  String _password = "";
-  GlobalKey<FormState> _forms = GlobalKey<FormState>();
-  RegisterController _registerController = RegisterController();
-
-  register(){
-    FormState form = _forms.currentState!; 
-    if(form.validate()){
-      form.save();
-      _registerController.register(
-        _name, 
-        _email, 
-        _password, 
-        _isAdmin ? 1 : 0
-      );
-    }
-    Navigator.pop(context);
-  }
+  final RegisterController _controller = RegisterController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar simplificada pois o Theme já define o estilo
-      appBar: AppBar(
-        title: Text("Criar Conta"),
-      ),
+      appBar: AppBar(title: Text("CRIAR CONTA"), backgroundColor: Colors.transparent, elevation: 0),
+      extendBodyBehindAppBar: true,
       body: Container(
+        decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF2E003E), Colors.black], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
         padding: EdgeInsets.all(30),
-        child: Center( // Centraliza verticalmente
+        child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.person_add_outlined, size: 60, color: Colors.amber[800]),
-                SizedBox(height: 30),
-                
-                Form(
-                  key: _forms,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: "Username",
-                          prefixIcon: Icon(Icons.alternate_email),
-                        ),
-                        onSaved: (newValue) => _name = newValue!,
-                      ),
-                      SizedBox(height: 20),
-                      
-                      TextFormField(
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: "Email",
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        onSaved: (newValue) => _email = newValue!,
-                      ),
-                      SizedBox(height: 20),
-                      
-                      TextFormField(
-                        obscureText: true,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: "Senha",
-                          prefixIcon: Icon(Icons.vpn_key_outlined),
-                        ),
-                        onSaved: (newValue) => _password = newValue!,
-                      ),
-                      SizedBox(height: 20),
-                      
-                      // Checkbox customizado
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            _isAdmin = !_isAdmin;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: Checkbox(
-                                  value: _isAdmin,
-                                  activeColor: Colors.amber[800],
-                                  checkColor: Colors.black,
-                                  onChanged: (value) => setState(() => _isAdmin = value!),
-                                ),
-                              ),
-                              SizedBox(width: 12),
-                              Text(
-                                "Conta de Administrador",
-                                style: TextStyle(color: Colors.white70, fontSize: 16),
-                              )
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 40),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => register(),
-                    child: Text("CADASTRAR")
-                  ),
-                ),
-                
-                SizedBox(height: 15),
-                
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    "Já possui conta? Faça login",
-                    style: TextStyle(color: Colors.white60),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Icon(Icons.person_add, size: 60, color: Colors.amber[800]),
+                  SizedBox(height: 30),
+                  _buildField(_usernameController, "Usuário", Icons.person),
+                  SizedBox(height: 20),
+                  _buildField(_emailController, "Email", Icons.email),
+                  SizedBox(height: 20),
+                  _buildField(_passwordController, "Senha", Icons.lock, isPass: true),
+                  SizedBox(height: 20),
+                  Row(children: [
+                    Checkbox(value: _isAdmin, activeColor: Colors.amber, onChanged: (v) => setState(() => _isAdmin = v!)),
+                    Text("Administrador", style: TextStyle(color: Colors.white))
+                  ]),
+                  SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[800]),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          bool success = await _controller.register(
+                            _usernameController.text, _emailController.text, _passwordController.text, _isAdmin ? 1 : 0
+                          );
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Sucesso!"), backgroundColor: Colors.green));
+                            Navigator.pop(context);
+                          }
+                        }
+                      },
+                      child: Text("CADASTRAR", style: TextStyle(color: Colors.black)),
+                    ),
                   )
-                )
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildField(TextEditingController c, String l, IconData i, {bool isPass = false}) {
+    return TextFormField(
+      controller: c, obscureText: isPass, style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(labelText: l, prefixIcon: Icon(i, color: Colors.amber), filled: true, fillColor: Colors.white10, border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+      validator: (v) => v!.isEmpty ? "Obrigatório" : null,
     );
   }
 }

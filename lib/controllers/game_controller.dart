@@ -8,7 +8,7 @@ import 'package:thegameawards/utils/database.dart';
 class GameController {
   DatabaseHelper con = DatabaseHelper();
 
-  // Busca todas as categorias para preencher o Dropdown do formulário
+
   Future<List<Category>> getAllCategories() async {
     return await Category.getAll(con);
   }
@@ -21,41 +21,43 @@ class GameController {
     return await Game.getAll(con);
   }
 
-  // Salvar ou Editar Jogo
+
   Future<bool> saveGame(Game game, int categoryId) async {
     int gameId;
     
     if (game.id == null) {
-      // 1. Cria o jogo novo
+  
       gameId = await game.save(con);
-      
-      // 2. Cria o vínculo na tabela category_game se uma categoria foi selecionada
+ 
       if (gameId > 0 && categoryId > 0) {
-        CategoryGame link = CategoryGame(categoryId: categoryId, gameId: gameId);
+        CategoryGame link = CategoryGame(
+          categoryId: categoryId, 
+          gameId: gameId
+        );
         await link.save(con);
-        return true;
-      } else if (gameId > 0) {
-        return true; // Salvou o jogo mesmo sem categoria
       }
+      return gameId > 0;
     } else {
-      // Editar existente: Chama o método update na INSTÂNCIA do jogo
+    
       int res = await game.update(con);
       return res > 0;
     }
-    return false;
   }
 
+ 
   Future<bool> deleteGame(int id) async {
-    // Cria um objeto temporário apenas com o ID para deletar
+ 
     Game game = Game(id: id, userId: 0, name: "", description: "", releaseDate: "");
     int res = await game.delete(con);
     return res > 0;
   }
 
+  // Votar em um jogo
   Future<void> vote(User user, Category category, Game game) async {
-  
+   
     await UserVote.deleteByUserCategory(con, user.id!, category.id!);
     
+  
     UserVote userVote = UserVote(
       userId: user.id!,
       categoryId: category.id!,
@@ -64,6 +66,7 @@ class GameController {
     await userVote.save(con);
   }
  
+  
   Future<void> unvote(User user, Category category) async {
     await UserVote.deleteByUserCategory(con, user.id!, category.id!);
   }

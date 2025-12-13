@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:thegameawards/controller/category_controller.dart';
 import 'package:thegameawards/model/category.dart';
+import 'package:thegameawards/model/category_controller.dart';
 
 class CategorieModerator extends StatefulWidget {
   const CategorieModerator({super.key});

@@ -1,40 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:thegameawards/controller/login_controler.dart';
-import 'categories.dart';
+import 'package:thegameawards/utils/database.dart';
 
-class User extends StatefulWidget {
-  const User({super.key});
+class User {
+  final int? id;
+  final String name;
+  final String password;
+  final String email;
+  final int role; 
 
-  @override
-  State<User> createState() => _UserState();
-}
+  User({this.id, required this.name, required this.password, required this.email, required this.role});
 
-class _UserState extends State<User> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Categorias"),
-        actions: [
-          TextButton(
-            onPressed: (){
-              LoginController.logout();
-              Navigator.pop(context);
-            }, 
-            child: Text("Logout")
-          )
-        ]
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF1E1E1E), Colors.black],
-          ),
-        ),
-        child: Categories(),
-      ),
-    );
+  Map<String, dynamic> toMap() => {"id": id, "name": name, "password": password, "email": email, "role": role};
+
+  factory User.fromMap(Map<String, dynamic> map) {
+    return User(id: map["id"], name: map["name"], password: map["password"], email: map["email"], role: map["role"]);
+  }
+
+  Future<int> save(DatabaseHelper con) async {
+    var db = await con.db;
+    return await db.insert('user', toMap());
+  }
+
+  static Future<User> getUserByLogin(DatabaseHelper con, String name, String password) async {
+    var db = await con.db;
+    var res = await db.query("user", where: "name = ? AND password = ?", whereArgs: [name, password]);
+    if (res.isNotEmpty) return User.fromMap(res.first);
+    return User(id: -1, name: "", password: "", email: "", role: 0);
+  }
+
+  static Future<User> getUserById(DatabaseHelper con, int id) async {
+    var db = await con.db;
+    var res = await db.query("user", where: "id = ?", whereArgs: [id]);
+    if (res.isNotEmpty) return User.fromMap(res.first);
+    return User(id: -1, name: "", password: "", email: "", role: 0);
   }
 }

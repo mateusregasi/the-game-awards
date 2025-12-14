@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:thegameawards/utils/database.dart';
 
 class Category {

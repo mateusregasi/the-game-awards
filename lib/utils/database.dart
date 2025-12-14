@@ -17,13 +17,13 @@ class DatabaseHelper {
   }
 
   Future<Database> initDb() async {
-    // Inicializa o FFI para suportar Linux/Windows/Mac
+  
     sqfliteFfiInit();
     var databaseFactory = databaseFactoryFfi;
 
     io.Directory appDocumentsDir = await getApplicationDocumentsDirectory();
     
-    // Mantendo o nome do seu banco atual para preservar os dados
+   
     final path = p.join(appDocumentsDir.path, "tga_2025_final.db"); 
 
     Database db = await databaseFactory.openDatabase(
@@ -31,9 +31,7 @@ class DatabaseHelper {
       options: OpenDatabaseOptions(
         version: 1,
         
-        // --- PROTEÇÃO DE DADOS ---
-        // Isso roda toda vez que o app abre.
-        // Se a tabela de votos faltar, ele cria sem apagar o resto.
+       
         onOpen: (db) async {
           await db.execute("""
             CREATE TABLE IF NOT EXISTS user_vote(
@@ -48,7 +46,7 @@ class DatabaseHelper {
           """);
         },
 
-        // --- CRIAÇÃO DO BANCO (Só roda se o arquivo .db não existir) ---
+     
         onCreate: (db, version) async {
           
           await db.execute("""
@@ -112,7 +110,7 @@ class DatabaseHelper {
             );
           """);
 
-          // Inserção dos dados padrão (apenas se for banco novo)
+     
           await db.rawInsert("INSERT INTO user(name, email, password, role) VALUES('admin', 'admin@tga.com', 'admin', 1)"); 
           await db.rawInsert("INSERT INTO user(name, email, password, role) VALUES('user', 'user@tga.com', '123', 0)");
 

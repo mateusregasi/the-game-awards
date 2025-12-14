@@ -46,7 +46,6 @@ class _GamesModeratorState extends State<GamesModerator> {
 
         List<Category> categories = snapshot.data!;
 
-        // DefaultTabController cria as ABAS automaticamente
         return DefaultTabController(
           length: categories.length,
           child: Column(
@@ -65,7 +64,6 @@ class _GamesModeratorState extends State<GamesModerator> {
                 ),
               ),
 
-              // --- 2. CONTEÚDO DAS ABAS (LISTA DE JOGOS) ---
               Expanded(
                 child: TabBarView(
                   children: categories.map((cat) {
@@ -78,7 +76,7 @@ class _GamesModeratorState extends State<GamesModerator> {
                 ),
               ),
 
-              // --- 3. BOTÃO ADICIONAR JOGO ---
+           
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
@@ -114,7 +112,6 @@ class _GamesModeratorState extends State<GamesModerator> {
   }
 }
 
-// --- LISTA DE JOGOS INTERNA (COM VOTOS) ---
 class _GamesListByCategory extends StatefulWidget {
   final Category category;
   final GameController controller;

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thegameawards/pages/home.dart';
 import 'package:thegameawards/pages/categoriemoderator.dart';
 import 'package:thegameawards/pages/gamesmoderator.dart';
+import 'package:thegameawards/pages/votes_dashboard.dart';
 
 class InterfaceModerator extends StatefulWidget {
   const InterfaceModerator({super.key});
@@ -16,7 +17,15 @@ class _InterfaceModeratorState extends State<InterfaceModerator> {
 
   final List<Widget> _pages = [
     const CategorieModerator(),
-    const GamesModerator(),
+    const GamesModerator(), // Jogos (CRUD) limpo
+    const VotesDashboard(), // Nova tela de Votos
+  ];
+
+  // Títulos dinâmicos para a AppBar
+  final List<String> _titles = [
+    "GERIR CATEGORIAS",
+    "GERIR JOGOS",
+    "RELATÓRIO DE VOTOS"
   ];
 
   void _onItemTapped(int index) {
@@ -43,7 +52,7 @@ class _InterfaceModeratorState extends State<InterfaceModerator> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
-          _selectedIndex == 0 ? "GERIR CATEGORIAS" : "GERIR JOGOS",
+          _titles[_selectedIndex],
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1, fontSize: 16),
         ),
         centerTitle: true,
@@ -91,6 +100,10 @@ class _InterfaceModeratorState extends State<InterfaceModerator> {
             BottomNavigationBarItem(
               icon: Icon(Icons.gamepad),
               label: "Jogos",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.bar_chart), 
+              label: "Votos",
             ),
           ],
         ),

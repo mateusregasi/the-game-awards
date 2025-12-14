@@ -17,20 +17,39 @@ class DatabaseHelper {
   }
 
   Future<Database> initDb() async {
-    // Inicializa o FFI para suportar Linux/Windows/Mac (ambiente de desenvolvimento)
+    // Inicializa o FFI para suportar Linux/Windows/Mac
     sqfliteFfiInit();
     var databaseFactory = databaseFactoryFfi;
 
     io.Directory appDocumentsDir = await getApplicationDocumentsDirectory();
-    // NOME ALTERADO PARA FORÇAR NOVA CRIAÇÃO COM DADOS COMPLETOS
+    
+    // Mantendo o nome do seu banco atual para preservar os dados
     final path = p.join(appDocumentsDir.path, "tga_2025_final.db"); 
 
     Database db = await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
         version: 1,
+        
+        // --- PROTEÇÃO DE DADOS ---
+        // Isso roda toda vez que o app abre.
+        // Se a tabela de votos faltar, ele cria sem apagar o resto.
+        onOpen: (db) async {
+          await db.execute("""
+            CREATE TABLE IF NOT EXISTS user_vote(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL,
+              category_id INTEGER NOT NULL,
+              vote_game_id INTEGER NOT NULL,    
+              FOREIGN KEY(user_id) REFERENCES user(id),
+              FOREIGN KEY(category_id) REFERENCES category(id),
+              FOREIGN KEY(vote_game_id) REFERENCES game(id)
+            );
+          """);
+        },
+
+        // --- CRIAÇÃO DO BANCO (Só roda se o arquivo .db não existir) ---
         onCreate: (db, version) async {
-      
           
           await db.execute("""
             CREATE TABLE user(
@@ -93,13 +112,11 @@ class DatabaseHelper {
             );
           """);
 
-       
-
-  
+          // Inserção dos dados padrão (apenas se for banco novo)
           await db.rawInsert("INSERT INTO user(name, email, password, role) VALUES('admin', 'admin@tga.com', 'admin', 1)"); 
           await db.rawInsert("INSERT INTO user(name, email, password, role) VALUES('user', 'user@tga.com', '123', 0)");
 
-        
+          // Mapa completo dos jogos TGA 2025
           Map<String, List<String>> categoriesData = {
             'Jogo do ano': [
               'Clair Obscur: Expedition 33', 'Death Stranding 2: On the beach', 'Donkey Kong Bananza',
@@ -213,7 +230,6 @@ class DatabaseHelper {
             ]
           };
 
-       
           Map<String, int> gameIdCache = {};
 
           for (var entry in categoriesData.entries) {
@@ -227,20 +243,15 @@ class DatabaseHelper {
 
             for (String nomineeName in nominees) {
               int gameId;
-              
-              
               String cleanName = nomineeName.replaceAll(RegExp(r"^'|'$"), "");
 
               if (gameIdCache.containsKey(cleanName)) {
-            
                 gameId = gameIdCache[cleanName]!;
               } else {
-                
                 var res = await db.rawQuery("SELECT id FROM game WHERE name = ?", [cleanName]);
                 if (res.isNotEmpty) {
                   gameId = res.first['id'] as int;
                 } else {
-                  
                   gameId = await db.rawInsert(
                     "INSERT INTO game(user_id, name, description, release_date) VALUES(1, ?, 'Nomeado TGA 2025', '2025')",
                     [cleanName]
@@ -249,7 +260,6 @@ class DatabaseHelper {
                 gameIdCache[cleanName] = gameId;
               }
 
-            
               await db.rawInsert(
                 "INSERT INTO category_game(category_id, game_id) VALUES(?, ?)",
                 [catId, gameId]

@@ -1,109 +1,29 @@
-import 'package:flutter/material.dart';
 import 'package:thegameawards/model/category.dart';
-import 'package:thegameawards/model/category_controller.dart';
-import 'package:thegameawards/model/category_form.dart';
+import 'package:thegameawards/utils/database.dart';
 
-class CategorieModerator extends StatefulWidget {
-  const CategorieModerator({super.key});
+class CategoryController {
+  DatabaseHelper con = DatabaseHelper();
 
-  @override
-  State<CategorieModerator> createState() => _CategorieModeratorState();
-}
-
-class _CategorieModeratorState extends State<CategorieModerator> {
-  CategoryController _categoryController = CategoryController();
-  late Future<List<Category>> _catFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshList();
+  Future<List<Category>> getCategories() async {
+    return await Category.getAll(con);
   }
 
-  void _refreshList() {
-    setState(() {
-      _catFuture = _categoryController.getCategories();
-    });
-  }
-
-  void _deleteCategory(int id) async {
-    bool confirm = await showDialog(
-      context: context, 
-      builder: (ctx) => AlertDialog(
-        title: Text("Excluir Categoria?"),
-        content: Text("Isso pode apagar os votos associados."),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text("Cancelar")),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text("Excluir", style: TextStyle(color: Colors.red))),
-        ],
-      )
-    ) ?? false;
-
-    if (confirm) {
-      await _categoryController.deleteCategory(id);
-      _refreshList();
+  Future<bool> saveCategory(Category category) async {
+    int res;
+    if (category.id == null) {
+      
+      res = await category.save(con);
+    } else {
+      
+      res = await category.update(con); 
     }
+    return res > 0;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              icon: Icon(Icons.add, color: Colors.black),
-              label: Text("NOVA CATEGORIA", style: TextStyle(color: Colors.black)),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[800]),
-              onPressed: () async {
-                bool? saved = await Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryForm()));
-                if (saved == true) _refreshList();
-              },
-            ),
-          ),
-        ),
-        Expanded(
-          child: FutureBuilder<List<Category>>(
-            future: _catFuture, 
-            builder: (context, snapshot){
-              if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-              
-              List<Category> categories = snapshot.data!;
-              return ListView.builder(
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  Category cat = categories[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    child: ListTile(
-                      leading: Icon(Icons.emoji_events, color: Colors.amber),
-                      title: Text(cat.title),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            onPressed: () async {
-                              bool? saved = await Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryForm(category: cat)));
-                              if (saved == true) _refreshList();
-                            }, 
-                            icon: Icon(Icons.edit, color: Colors.blue)
-                          ),
-                          IconButton(
-                            onPressed: () => _deleteCategory(cat.id!), 
-                            icon: Icon(Icons.delete, color: Colors.red)
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            } 
-          )
-        )
-      ],
-    );
+  // Excluir Categoria
+  Future<bool> deleteCategory(int id) async {
+    Category t = Category(id: id, userId: 0, title: "", description: "", date: "");
+    int res = await t.delete(con);
+    return res > 0;
   }
 }

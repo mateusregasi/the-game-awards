@@ -1,89 +1,96 @@
 import 'package:flutter/material.dart';
-import 'package:thegameawards/controller/login_controler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thegameawards/pages/home.dart';
 import 'package:thegameawards/pages/categoriemoderator.dart';
-import 'package:thegameawards/pages/categories.dart';
 import 'package:thegameawards/pages/gamesmoderator.dart';
-// import 'package:thegameawards/utils/conf.dart'; // Não precisa mais
 
 class InterfaceModerator extends StatefulWidget {
-  final String title;
-  const InterfaceModerator({super.key, required this.title});
+  const InterfaceModerator({super.key});
 
   @override
   State<InterfaceModerator> createState() => _InterfaceModeratorState();
 }
 
 class _InterfaceModeratorState extends State<InterfaceModerator> {
-  int _page = 0;
-  
-  
+  int _selectedIndex = 0;
+
   final List<Widget> _pages = [
-    Categories(),       
-    GamesModerator(),   
-    CategorieModerator(), 
+    const CategorieModerator(),
+    const GamesModerator(),
   ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); 
+
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const Home()),
+        (Route<dynamic> route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(
+          _selectedIndex == 0 ? "GERIR CATEGORIAS" : "GERIR JOGOS",
+          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1, fontSize: 16),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.amber[800]),
+        titleTextStyle: TextStyle(color: Colors.white),
         actions: [
-          TextButton(
-            onPressed: (){
-              LoginController.logout();
-              Navigator.pop(context);
-            }, 
-            child: Text("Logout")
+          IconButton(
+            onPressed: _logout,
+            icon: Icon(Icons.logout, color: Colors.redAccent),
+            tooltip: "Sair",
           )
         ],
       ),
-     
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF1E1E1E), Colors.black],
+            colors: [Color(0xFF2E003E), Colors.black],
           ),
         ),
-        child: _pages[_page],
+        child: SafeArea(
+          child: _pages[_selectedIndex],
+        ),
       ),
-      
-    
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.white10, width: 1))
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Color(0xFF1E1E1E),
         ),
         child: BottomNavigationBar(
-          backgroundColor: Colors.black, 
-          selectedItemColor: Colors.amber[800], 
-          unselectedItemColor: Colors.grey[600], 
-          currentIndex: _page,
-          showUnselectedLabels: true,
-          type: BottomNavigationBarType.fixed, 
-          onTap: (value) {
-            setState(() {
-              _page = value;
-            });
-          },
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          backgroundColor: Color(0xFF1E1E1E),
+          selectedItemColor: Colors.amber[800],
+          unselectedItemColor: Colors.white38,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.how_to_vote_outlined),
-              activeIcon: Icon(Icons.how_to_vote),
-              label: "Votação",
+              icon: Icon(Icons.category),
+              label: "Categorias",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.gamepad_outlined),
-              activeIcon: Icon(Icons.gamepad),
-              label: "Gerenciar Jogos",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.category_outlined),
-              activeIcon: Icon(Icons.category),
-              label: "Gerenciar Cat.",
+              icon: Icon(Icons.gamepad),
+              label: "Jogos",
             ),
           ],
         ),

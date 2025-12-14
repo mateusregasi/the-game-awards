@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thegameawards/model/category.dart';
-import 'package:thegameawards/model/category_controller.dart';
+import 'package:thegameawards/controller/category_controller.dart';
 import 'package:thegameawards/pages/games.dart';
 import 'home.dart'; 
 

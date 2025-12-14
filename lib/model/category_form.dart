@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:thegameawards/controller/category_controller.dart';
 import 'package:thegameawards/model/category.dart';
-import 'package:thegameawards/model/category_controller.dart';
 
 class CategoryForm extends StatefulWidget {
   final Category? category;
@@ -28,7 +28,13 @@ class _CategoryFormState extends State<CategoryForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.category == null ? "NOVA CATEGORIA" : "EDITAR CATEGORIA")),
+      backgroundColor: Color(0xFF121212),
+      appBar: AppBar(
+        title: Text(widget.category == null ? "NOVA CATEGORIA" : "EDITAR CATEGORIA", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.amber[800]),
+        elevation: 0,
+      ),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Form(
@@ -37,34 +43,52 @@ class _CategoryFormState extends State<CategoryForm> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: "Título", border: OutlineInputBorder()),
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: "Título", 
+                  labelStyle: TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: Color(0xFF1E1E1E),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))
+                ),
                 validator: (v) => v!.isEmpty ? "Campo obrigatório" : null,
               ),
               SizedBox(height: 20),
               TextFormField(
                 controller: _descController,
-                decoration: InputDecoration(labelText: "Descrição", border: OutlineInputBorder()),
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: "Descrição", 
+                  labelStyle: TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: Color(0xFF1E1E1E),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))
+                ),
                 maxLines: 3,
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[800], padding: EdgeInsets.all(15)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber[800], 
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                  ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       Category c = Category(
                         id: widget.category?.id,
-                        userId: 1, // Assume admin ID 1
+                        userId: 1, 
                         title: _titleController.text,
                         description: _descController.text,
                         date: "2025"
                       );
                       await _ctrl.saveCategory(c);
-                      if (mounted) Navigator.pop(context, true); // Retorna true para recarregar lista
+                      if (mounted) Navigator.pop(context, true);
                     }
                   },
-                  child: Text("SALVAR", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  child: Text("SALVAR", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               )
             ],

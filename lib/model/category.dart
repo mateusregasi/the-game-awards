@@ -41,7 +41,7 @@ class Category {
     return await db.insert('category', toMap());
   }
   
-  // --- MÉTODO NOVO PARA EDITAR ---
+  // -
   Future<int> update(DatabaseHelper con) async {
     var db = await con.db;
     return await db.update('category', toMap(), where: "id = ?", whereArgs: [id]);

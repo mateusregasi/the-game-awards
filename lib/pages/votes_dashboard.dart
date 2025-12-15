@@ -100,7 +100,8 @@ class _CategoryVoteCard extends StatelessWidget {
                 return Column(
                   children: games.map((game) {
                     return FutureBuilder<int>(
-                      future: controller.getVoteCount(game.id!),
+                      // --- ATUALIZAÇÃO AQUI: Passando game.id E category.id ---
+                      future: controller.getVoteCount(game.id!, category.id!),
                       builder: (context, voteSnap) {
                         int votes = voteSnap.data ?? 0;
                         

@@ -24,7 +24,7 @@ class DatabaseHelper {
     io.Directory appDocumentsDir = await getApplicationDocumentsDirectory();
     
    
-    final path = p.join(appDocumentsDir.path, "tga_2025_final.db"); 
+    final path = p.join(appDocumentsDir.path, "tga_2025_v2.db"); 
 
     Database db = await databaseFactory.openDatabase(
       path,
@@ -124,7 +124,7 @@ class DatabaseHelper {
               'Clair Obscur: Expedition 33', 'Death Stranding 2: On the beach', 'Ghost of Yotei',
               'Hades 2', 'Split Fiction'
             ],
-            'Melhor time de esports': [
+            'Melhor time de E-sports': [
               'Gen.G - League of legends', 'NRG - Valorant', 'Team Falcons - Dota 2',
               'Team Liquid PH - Mobile Legends: Bang bang', 'Team Vitality - Counter Strike 2'
             ],
@@ -135,7 +135,7 @@ class DatabaseHelper {
               'Counter Strike 2', 'Dota 2', 'League of legends', 'Mobile legends: Bang bang', 'Valorant'
             ],
             'Melhor jogo de esporte/corrida': [
-              'FC 26', 'F1 25', 'Mario Kart World', 'Rematch', 'Sonic Racing: CrossWorlds'
+              'EA FC 26', 'F1 25', 'Mario Kart World', 'Rematch', 'Sonic Racing: CrossWorlds'
             ],
             'Melhor jogo de simulação/estratégia': [
               'The Alters', 'Final Fantasy Tactics - The Ivalice chronicles', 'Jurassic World Evolution 3',

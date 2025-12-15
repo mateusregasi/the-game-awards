@@ -20,10 +20,14 @@ class GameController {
     return await Game.getAll(con);
   }
 
-  // --- Função Crítica para os Votos ---
-  Future<int> getVoteCount(int gameId) async {
+  // --- CORREÇÃO AQUI: Adicionado categoryId ---
+  Future<int> getVoteCount(int gameId, int categoryId) async {
     var db = await con.db;
-    var res = await db.rawQuery("SELECT COUNT(*) as count FROM user_vote WHERE vote_game_id = ?", [gameId]);
+    // Agora filtramos pelo JOGO e pela CATEGORIA
+    var res = await db.rawQuery(
+      "SELECT COUNT(*) as count FROM user_vote WHERE vote_game_id = ? AND category_id = ?", 
+      [gameId, categoryId]
+    );
     
     if (res.isNotEmpty) {
       return res.first['count'] as int;

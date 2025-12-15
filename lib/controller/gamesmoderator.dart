@@ -167,9 +167,9 @@ class _GamesListByCategoryState extends State<_GamesListByCategory> {
                   ),
                 ),
 
-                // --- MOSTRA OS VOTOS AQUI ---
                 subtitle: FutureBuilder<int>(
-                  future: widget.controller.getVoteCount(game.id!),
+                  // --- CORREÇÃO AQUI: Passamos game.id E category.id ---
+                  future: widget.controller.getVoteCount(game.id!, widget.category.id!),
                   builder: (context, voteSnap) {
                     int votes = voteSnap.data ?? 0;
                     return Padding(
